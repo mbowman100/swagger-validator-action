@@ -12,9 +12,9 @@ See example for suggested command for finding all files ending in "openapi.yaml"
 
 ## Outputs
 
-`api.openapi.yaml is valid`
+`example.openapi.yaml is valid`
 
-`api.openapi.yaml is invalid`
+`example.openapi.yaml is invalid`
 
 ## Example usage
 
@@ -23,7 +23,7 @@ See example for suggested command for finding all files ending in "openapi.yaml"
 uses: mbowman100/swagger-validator-action@v1
 with:
   files:
-    api.openapi.example.yaml
+    example.openapi.yaml
 
 ```
 
