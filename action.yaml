@@ -1,5 +1,10 @@
 name: 'Validate Swagger using Swagger CLI'
 description: 'Access to the swagger-cli via a github action'
+
+branding:
+  icon: 'award'
+  color: 'green'
+
 inputs:
   files:
     description: 'Swagger file(s) to validate'
