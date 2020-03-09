@@ -1,0 +1,20 @@
+{
+  "name": "swagger-validator-action",
+  "version": "1.0.0",
+  "description": "This action uses the swagger-cli to validate a given swagger file(s).",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mbowman100/swagger-validator-action.git"
+  },
+  "keywords": ["swagger", "openapi", "api", "documentation", "validator"],
+  "author": "Mike Bowman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mbowman100/swagger-validator-action/issues"
+  },
+  "homepage": "https://github.com/mbowman100/swagger-validator-action#readme"
+}
