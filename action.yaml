@@ -1,0 +1,12 @@
+name: 'Validate Swagger using Swagger CLI'
+description: 'Access to the swagger-cli via a github action'
+inputs:
+  files:
+    description: 'Swagger file(s) to validate'
+    required: true
+outputs:
+  <file name> is valid
+
+runs:
+  using: 'node12'
+  main: 'index.js'
