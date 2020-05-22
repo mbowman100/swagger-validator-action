@@ -40,11 +40,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Get OpenAPI files
-      run: |
-        FILES="$(find . -iname "*openapi.yaml")"
+      run:  |
+        FILES="$(find . \( -iname "*openapi.yaml" -or -iname "*openapi.yml" \) -not -path "./.github/*")"
+        FILES_C="$(echo "$FILES" | sed '/^\s*$/d' | wc -l)"
         echo ::set-env name=FILE_LIST::$FILES
+        echo ::set-env name=FILE_COUNT::$FILES_C
+        echo "Found files:"
+        echo "$FILES"
     - name: swagger-validator
       uses: mbowman100/swagger-validator-action@master
+      if: env.FILE_COUNT != '0' # Comment out if you want it to fail if no files found
       with:
         files: ${{ env.FILE_LIST }}
 ```
