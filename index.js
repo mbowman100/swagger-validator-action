@@ -6,6 +6,7 @@ try {
 
     // Bail if no files
     if (files == '') {
+        console.log('No files to validate');
         return core.setOutput('No files to validate');
     }
 
