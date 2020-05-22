@@ -6,11 +6,12 @@ try {
 
     // Bail if no files
     if (files == '') {
-        return console.log('No files to validate');
+        return core.setOutput('No files to validate');
     }
 
     files.split(" ").forEach(file => {
         console.log(`Validating file: ${file}`);
+        core.setOutput(`Validating file: ${file}`);
 
         validate(file, {
             format: 2,
@@ -20,6 +21,7 @@ try {
     });
 } catch (error) {
     console.error(error);
+    core.setFailed(error);
 }
 
 async function validate(file, options) {
