@@ -3,11 +3,12 @@ const api = require("swagger-cli");
 
 try {
     const files = core.getInput('files', { required: true }).trim();
+
     // Bail if no files
-    if (files !== '') {
-        return core.setOutput('No files to validate')
+    if (files == '') {
+        return console.log('No files to validate');
     }
-    
+
     files.split(" ").forEach(file => {
         console.log(`Validating file: ${file}`);
 
@@ -17,7 +18,9 @@ try {
             wrap: Infinity
         });
     });
-} catch (error) { /* NOOP */ }
+} catch (error) {
+    console.error(error);
+}
 
 async function validate(file, options) {
     try {
