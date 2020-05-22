@@ -1,4 +1,4 @@
-name: 'Validate Swagger using Swagger CLI'
+name: 'Validate Swagger and OpenAPI using Swagger CLI'
 description: 'Access to the swagger-cli via a github action'
 
 branding:
@@ -7,7 +7,7 @@ branding:
 
 inputs:
   files:
-    description: 'Swagger file(s) to validate'
+    description: 'Swagger/OpenAPI file(s) to validate'
     required: true
 outputs:
   <file name> is valid
