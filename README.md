@@ -20,9 +20,9 @@ See example for suggested command for finding all files ending in "openapi.yaml"
 
 ```yaml
 
-uses: mbowman100/swagger-validator-action@v1
+uses: mbowman100/swagger-validator-action@master
 with:
-  files:
+  files: |
     example.openapi.yaml
 
 ```
