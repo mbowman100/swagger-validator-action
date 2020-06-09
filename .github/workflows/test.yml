@@ -1,0 +1,15 @@
+name: Validate example API swagger documentation
+on: [push, pull_request]
+jobs:
+  validate:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use local action
+      uses: ./
+      with:
+        files: |
+          example.openapi.yaml

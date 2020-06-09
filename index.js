@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const api = require("swagger-cli");
+const api = require("@apidevtools/swagger-cli");
 
 try {
     const files = core.getInput('files', { required: true }).trim();
