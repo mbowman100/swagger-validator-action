@@ -10,7 +10,7 @@ inputs:
     description: 'Swagger/OpenAPI file(s) to validate'
     required: true
 outputs:
-  <file name> is valid
+  '<file name> is valid'
 
 runs:
   using: 'node12'
