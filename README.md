@@ -10,11 +10,26 @@ This action uses the swagger-cli to validate a given swagger file(s).
 
 See example for suggested command for finding all files ending in "openapi.yaml".
 
-## Outputs
+### `space_separated`
 
-`example.openapi.yaml is valid`
+**Optional** Defaults to true.
 
-`example.openapi.yaml is invalid`
+For use when passing in a list of files that are space separated.
+
+## Example output
+
+```
+Validating file: example.openapi.yaml
+example.openapi.yaml is valid
+```
+
+## Output variables
+
+### invalidFiles
+List of files that failed to validate.
+
+### validFiles
+List of valid files.
 
 ## Example usage
 
@@ -38,18 +53,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
     - name: Get OpenAPI files
+      id: getfiles
+      uses: actions/checkout@v2
       run:  |
-        FILES="$(find . \( -iname "*openapi.yaml" -or -iname "*openapi.yml" \) -not -path "./.github/*")"
-        FILES_C="$(echo "$FILES" | sed '/^\s*$/d' | wc -l)"
-        echo ::set-env name=FILE_LIST::$FILES
-        echo ::set-env name=FILE_COUNT::$FILES_C
-        echo "Found files:"
-        echo "$FILES"
+        # Using github env (newline separated file list)
+        echo 'FILE_LIST<<EOF' >> $GITHUB_ENV
+        find lib -type f -iname "*openapi.yaml" >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
+
+        # Using step output (space separated file list)
+        FILES="$(find lib -type f -iname "*openapi.yaml")"
+        echo "::set-output name=file_list::$FILES"
     - name: swagger-validator
       uses: mbowman100/swagger-validator-action@master
       if: env.FILE_COUNT != '0' # Comment out if you want it to fail if no files found
       with:
         files: ${{ env.FILE_LIST }}
+        # files: ${{ steps.getfiles.outputs.file_list }} # For if you're using output
 ```

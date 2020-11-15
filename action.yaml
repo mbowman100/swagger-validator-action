@@ -7,11 +7,16 @@ branding:
 
 inputs:
   files:
-    description: 'Swagger/OpenAPI file(s) to validate'
+    description: 'List of Swagger/OpenAPI file(s) to validate. Seperate each file with a new line or a space.'
     required: true
+  space_separated:
+    description: 'Defaults to true.'
+    required: false
 outputs:
-  file_list:
-    description: '<file name> is valid'
+  invalidFiles:
+    description: 'List of invalid files.'
+  validFiles:
+    description: 'List of valid files.'
 
 runs:
   using: 'node12'

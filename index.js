@@ -2,36 +2,59 @@ const core = require('@actions/core');
 const api = require("@apidevtools/swagger-cli");
 
 try {
-    const files = core.getInput('files', { required: true }).trim();
+    const files = core.getInput(
+        'files',
+        { required: true }
+    ).trim();
+
+    const space_separated = core.getInput(
+        'space_separated',
+        {
+            required: false,
+            default: '1'
+        }
+    ).trim();
 
     // Bail if no files
     if (files == '') {
-        console.log('No files to validate');
-        return core.setOutput('No files to validate');
+        return core.info('No files to validate');
     }
 
-    files.split(" ").forEach(file => {
-        console.log(`Validating file: ${file}`);
-        core.setOutput(`Validating file: ${file}`);
+    if(space_separated == 1) {
+        files = files.replace(/(\.ya?ml)\s/g, `$1\n`);
+    }
 
-        validate(file, {
+    var invalidFiles = [];
+    var validFiles = [];
+    files.split(/\n/).forEach(file => {
+        core.info(`Validating file: ${file}`);
+
+        var error = validate(file, {
             format: 2,
             type: "yaml",
             wrap: Infinity
         });
+
+        if(error) {
+            invalidFiles.push(file);
+        } else {
+            validFiles.push(file);
+        }
     });
+
+    core.setOutput('invalidFiles', invalidFiles);
+    core.setOutput('validFiles', validFiles);
 } catch (error) {
-    console.error(error);
     core.setFailed(error);
 }
 
 async function validate(file, options) {
+    var error;
     try {
         await api.validate(file, options);
-        console.log(file, " is valid");
-        core.setOutput(`${file} is valid`);
+        core.info(`${file} is valid`);
     } catch (error) {
-        console.error(error.message);
-        core.setFailed(`${file} is invalid`);
+        core.setFailed(`${file} is invalid\n${error.message}`);
     }
+    return error;
 }

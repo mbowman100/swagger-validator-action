@@ -9,7 +9,12 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Use local action
+      id: example
       uses: ./
       with:
         files: |
           example.openapi.yaml
+    - name: Output export variable
+      run: |
+        echo ${{ steps.example.outputs.validFiles }}
+        echo ${{ steps.example.outputs.invalidFiles }}
