@@ -3,7 +3,9 @@
 let isWindows = /^win/.test(process.platform),
     forwardSlashPattern = /\//g,
     protocolPattern = /^(\w{2,}):\/\//i,
-    url = module.exports;
+    url = module.exports,
+    jsonPointerSlash = /~1/g,
+    jsonPointerTilde = /~0/g;
 
 // RegExp patterns to URL-encode special characters in local filesystem paths
 let urlEncodePatterns = [
@@ -231,4 +233,25 @@ exports.toFileSystemPath = function toFileSystemPath (path, keepFileProtocol) {
   }
 
   return path;
+};
+
+/**
+ * Converts a $ref pointer to a valid JSON Path.
+ *
+ * @param {string}  pointer
+ * @returns {Array<number | string>}
+ */
+exports.safePointerToPath = function safePointerToPath (pointer) {
+  if (pointer.length <= 1 || pointer[0] !== "#" || pointer[1] !== "/") {
+    return [];
+  }
+
+  return pointer
+    .slice(2)
+    .split("/")
+    .map((value) => {
+      return decodeURIComponent(value)
+        .replace(jsonPointerSlash, "/")
+        .replace(jsonPointerTilde, "~");
+    });
 };
