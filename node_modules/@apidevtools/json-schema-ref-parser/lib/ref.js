@@ -3,6 +3,8 @@
 module.exports = $Ref;
 
 const Pointer = require("./pointer");
+const { InvalidPointerError, isHandledError, normalizeError } = require("./util/errors");
+const { safePointerToPath, stripHash, getHash } = require("./util/url");
 
 /**
  * This class represents a single JSON reference and its resolved value.
@@ -40,7 +42,35 @@ function $Ref () {
    * @type {?string}
    */
   this.pathType = undefined;
+
+  /**
+   * List of all errors. Undefined if no errors.
+   * @type {Array<JSONParserError | ResolverError | ParserError | MissingPointerError>}
+   */
+  this.errors = undefined;
 }
+
+/**
+ * Pushes an error to errors array.
+ *
+ * @param {Array<JSONParserError | JSONParserErrorGroup>} error - The error to be pushed
+ * @returns {void}
+ */
+$Ref.prototype.addError = function (err) {
+  if (this.errors === undefined) {
+    this.errors = [];
+  }
+
+  // the path has been almost certainly set at this point,
+  // but just in case something went wrong, let's inject path if necessary
+  if (Array.isArray(err.errors)) {
+    this.errors.push(...err.errors.map(normalizeError));
+  }
+  else {
+    this.errors.push(normalizeError(err));
+  }
+};
+
 
 /**
  * Determines whether the given JSON reference exists within this {@link $Ref#value}.
@@ -75,12 +105,33 @@ $Ref.prototype.get = function (path, options) {
  *
  * @param {string} path - The full path being resolved, optionally with a JSON pointer in the hash
  * @param {$RefParserOptions} options
- * @param {string} [friendlyPath] - The original user-specified path (used for error messages)
+ * @param {string} friendlyPath - The original user-specified path (used for error messages)
+*  @param {string} pathFromRoot - The path of `obj` from the schema root
  * @returns {Pointer}
  */
-$Ref.prototype.resolve = function (path, options, friendlyPath) {
+$Ref.prototype.resolve = function (path, options, friendlyPath, pathFromRoot) {
   let pointer = new Pointer(this, path, friendlyPath);
-  return pointer.resolve(this.value, options);
+  try {
+    return pointer.resolve(this.value, options, pathFromRoot);
+  }
+  catch (err) {
+    if (!options || !options.continueOnError || !isHandledError(err)) {
+      throw err;
+    }
+
+    if (err.path === null) {
+      err.path = safePointerToPath(getHash(pathFromRoot));
+    }
+
+    if (err instanceof InvalidPointerError) {
+      // this is a special case - InvalidPointerError is thrown when dereferencing external file,
+      // but the issue is caused by the source file that referenced the file that undergoes dereferencing
+      err.source = stripHash(pathFromRoot);
+    }
+
+    this.addError(err);
+    return null;
+  }
 };
 
 /**
