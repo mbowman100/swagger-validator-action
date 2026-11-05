@@ -1,10 +1,11 @@
 {
   "name": "swagger-validator-action",
   "version": "1.0.0",
-  "description": "This action uses the swagger-cli to validate a given swagger file(s).",
+  "description": "Validate Swagger and OpenAPI documents with Swagger Parser.",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "ncc build index.js -o dist --minify --license licenses.txt",
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
@@ -24,8 +25,13 @@
   },
   "homepage": "https://github.com/mbowman100/swagger-validator-action#readme",
   "dependencies": {
-    "@actions/core": "^1.2.6",
-    "@actions/github": "^2.2.0",
-    "@apidevtools/swagger-cli": "^4.0.2"
+    "@actions/core": "^3.0.1",
+    "@apidevtools/swagger-parser": "^13.1.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.45.0"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

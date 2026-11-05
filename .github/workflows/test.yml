@@ -1,20 +1,32 @@
 name: Validate example API swagger documentation
 on: [push, pull_request]
+
+permissions:
+  contents: read
+
 jobs:
   validate:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Use local action
-      id: example
-      uses: ./
-      with:
-        files: |
-          example.openapi.yaml
-    - name: Output export variable
-      run: |
-        echo ${{ steps.example.outputs.validFiles }}
-        echo ${{ steps.example.outputs.invalidFiles }}
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Check bundled action is up to date
+        run: git diff --exit-code -- dist
+      - run: npm test
+      - name: Use local action
+        id: example
+        uses: ./
+        with:
+          files: example.openapi.yaml
+      - name: Show validation results
+        env:
+          VALID_FILES: ${{ steps.example.outputs.validFiles }}
+          INVALID_FILES: ${{ steps.example.outputs.invalidFiles }}
+        run: |
+          printf 'Valid files: %s\n' "$VALID_FILES"
+          printf 'Invalid files: %s\n' "$INVALID_FILES"
