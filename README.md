@@ -1,74 +1,77 @@
-# Validate Swagger API Documentation
+# Validate Swagger and OpenAPI
 
-This action uses the swagger-cli to validate a given swagger file(s).
+Validate JSON or YAML API documents using Swagger Parser. Invalid documents fail the step, while every supplied file is checked. The action runs on Node.js 24 and includes its dependencies in `dist/`; callers do not need to install Node.js or npm packages.
 
 ## Inputs
 
-### `files`
+- `files` (required): whitespace-separated file paths by default. Both JSON and YAML are supported.
+- `space_separated` (default: `true`): set to `false` for newline-separated paths containing spaces. Legacy `1` and `0` values are also supported.
 
-**Required** The name of the file(s) to validate. Can be a single file path or a list of files.
+## Outputs
 
-See example for suggested command for finding all files ending in "openapi.yaml".
+- `validFiles`: JSON array of valid file paths.
+- `invalidFiles`: JSON array of invalid file paths.
 
-### `space_separated`
+Both outputs are written after validation finishes, including when documents fail validation. Outputs use GitHub's environment files rather than the deprecated `set-output` command.
 
-**Optional** Defaults to true.
-
-For use when passing in a list of files that are space separated.
-
-## Example output
-
-```
-Validating file: example.openapi.yaml
-example.openapi.yaml is valid
-```
-
-## Output variables
-
-### invalidFiles
-List of files that failed to validate.
-
-### validFiles
-List of valid files.
-
-## Example usage
+## Usage
 
 ```yaml
+name: Validate API documentation
+on: [push, pull_request]
 
-uses: mbowman100/swagger-validator-action@master
-with:
-  files: |
-    example.openapi.yaml
+permissions:
+  contents: read
 
-```
-
-## Example of usage from within a repo
-
-```yaml
-on: push
-name: Validate API swagger documentation
 jobs:
   validate:
-
     runs-on: ubuntu-latest
-
     steps:
-    - name: Get OpenAPI files
-      id: getfiles
-      uses: actions/checkout@v2
-      run:  |
-        # Using github env (newline separated file list)
-        echo 'FILE_LIST<<EOF' >> $GITHUB_ENV
-        find lib -type f -iname "*openapi.yaml" >> $GITHUB_ENV
-        echo 'EOF' >> $GITHUB_ENV
-
-        # Using step output (space separated file list)
-        FILES="$(find lib -type f -iname "*openapi.yaml")"
-        echo "::set-output name=file_list::$FILES"
-    - name: swagger-validator
-      uses: mbowman100/swagger-validator-action@master
-      if: env.FILE_COUNT != '0' # Comment out if you want it to fail if no files found
-      with:
-        files: ${{ env.FILE_LIST }}
-        # files: ${{ steps.getfiles.outputs.file_list }} # For if you're using output
+      - uses: actions/checkout@v7
+      - name: Validate OpenAPI
+        id: validate
+        uses: mbowman100/swagger-validator-action@master
+        with:
+          files: |
+            docs/api.openapi.json
+            example.openapi.yaml
+          space_separated: 'false'
+      - name: Show results
+        if: always()
+        env:
+          VALID_FILES: ${{ steps.validate.outputs.validFiles }}
+          INVALID_FILES: ${{ steps.validate.outputs.invalidFiles }}
+        run: |
+          printf 'Valid files: %s\n' "$VALID_FILES"
+          printf 'Invalid files: %s\n' "$INVALID_FILES"
 ```
+
+For production use, pin the validator action to a reviewed commit containing these changes. Existing pins keep using the older runtime and implementation until updated.
+
+To discover files in a workflow, use an environment file:
+
+```yaml
+- name: Find OpenAPI files
+  run: |
+    echo 'FILE_LIST<<EOF' >> "$GITHUB_ENV"
+    find lib doc/openapi -type f \( -iname '*openapi.yaml' -o -iname '*openapi.yml' -o -iname '*.openapi.json' \) >> "$GITHUB_ENV"
+    echo 'EOF' >> "$GITHUB_ENV"
+- uses: mbowman100/swagger-validator-action@master
+  with:
+    files: ${{ env.FILE_LIST }}
+    space_separated: 'false'
+```
+
+Only supplied files are validated. Include generated JSON documents as well as source YAML, and run validation after documentation generation. Remote `$ref` targets must be reachable. Validation checks document structure and references; it does not compare documentation with application handlers.
+
+## Development
+
+Use Node.js 24:
+
+```sh
+npm ci
+npm run build
+npm test
+```
+
+Commit `dist/` and `package-lock.json` when changing the action or its dependencies. CI checks that the bundle matches its source and tests both entry points.

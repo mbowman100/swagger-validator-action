@@ -1,5 +1,5 @@
-name: 'Validate Swagger and OpenAPI using Swagger CLI'
-description: 'Access to the swagger-cli via a github action'
+name: 'Validate Swagger and OpenAPI'
+description: 'Validate Swagger and OpenAPI documents using Swagger Parser'
 
 branding:
   icon: 'award'
@@ -7,17 +7,18 @@ branding:
 
 inputs:
   files:
-    description: 'List of Swagger/OpenAPI file(s) to validate. Seperate each file with a new line or a space.'
+    description: 'List of Swagger/OpenAPI file(s) to validate. Separate each file with a new line or a space.'
     required: true
   space_separated:
-    description: 'Defaults to true.'
+    description: 'Split on whitespace. Set false to allow spaces in newline-separated file paths.'
     required: false
+    default: 'true'
 outputs:
   invalidFiles:
-    description: 'List of invalid files.'
+    description: 'JSON array of invalid file paths.'
   validFiles:
-    description: 'List of valid files.'
+    description: 'JSON array of valid file paths.'
 
 runs:
-  using: 'node12'
-  main: 'index.js'
+  using: 'node24'
+  main: 'dist/index.js'

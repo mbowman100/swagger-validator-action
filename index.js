@@ -1,60 +1,44 @@
-const core = require('@actions/core');
-const api = require("@apidevtools/swagger-cli");
+const SwaggerParser = require('@apidevtools/swagger-parser');
 
-try {
-    const files = core.getInput(
-        'files',
-        { required: true }
-    ).trim();
-
-    const space_separated = core.getInput(
-        'space_separated',
-        {
-            required: false,
-            default: '1'
-        }
-    ).trim();
-
-    // Bail if no files
-    if (files == '') {
-        return core.info('No files to validate');
+async function run(core) {
+    const files = core.getInput('files', { required: true }).trim();
+    const separator = core.getInput('space_separated').trim().toLowerCase();
+    if (!['', '1', '0', 'true', 'false'].includes(separator)) {
+        throw new Error('space_separated must be true, false, 1, or 0');
     }
 
-    if(space_separated == 1) {
-        files = files.replace(/(\.ya?ml)\s/g, `$1\n`);
-    }
+    const spaceSeparated = !['false', '0'].includes(separator);
+    const fileList = files.split(spaceSeparated ? /\s+/ : /\r?\n/)
+        .map(file => file.trim()).filter(Boolean);
+    const invalidFiles = [];
+    const validFiles = [];
 
-    var invalidFiles = [];
-    var validFiles = [];
-    files.split(/\n/).forEach(file => {
+    for (const file of fileList) {
         core.info(`Validating file: ${file}`);
-
-        var error = validate(file, {
-            format: 2,
-            type: "yaml",
-            wrap: Infinity
-        });
-
-        if(error) {
-            invalidFiles.push(file);
-        } else {
+        try {
+            await SwaggerParser.validate(file);
             validFiles.push(file);
+            core.info(`${file} is valid`);
+        } catch (error) {
+            invalidFiles.push(file);
+            core.error(`${file} is invalid\n${error.message}`);
         }
-    });
+    }
 
     core.setOutput('invalidFiles', invalidFiles);
     core.setOutput('validFiles', validFiles);
-} catch (error) {
-    core.setFailed(error);
+    if (invalidFiles.length) {
+        core.setFailed(`${invalidFiles.length} OpenAPI document(s) failed validation`);
+    }
 }
 
-async function validate(file, options) {
-    var error;
+import('@actions/core').then(async core => {
     try {
-        await api.validate(file, options);
-        core.info(`${file} is valid`);
+        await run(core);
     } catch (error) {
-        core.setFailed(`${file} is invalid\n${error.message}`);
+        core.setFailed(error.message);
     }
-    return error;
-}
+}).catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+});
