@@ -1,0 +1,10 @@
+Bundled license information:
+
+js-yaml/dist/js-yaml.mjs:
+  /*! js-yaml 5.5.0 https://github.com/nodeca/js-yaml @license MIT */
+
+undici/lib/web/fetch/body.js:
+  /*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */
+
+undici/lib/web/websocket/frame.js:
+  /*! ws. MIT License. Einar Otto Stangvik <einaros@gmail.com> */

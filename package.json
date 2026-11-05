@@ -4,7 +4,7 @@
   "description": "Validate Swagger and OpenAPI documents with Swagger Parser.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "ncc build index.js -o dist --minify --license licenses.txt",
+    "build": "node scripts/build.js",
     "test": "node --test"
   },
   "repository": {
@@ -28,10 +28,10 @@
     "@actions/core": "^3.0.1",
     "@apidevtools/swagger-parser": "^13.1.0"
   },
-  "devDependencies": {
-    "@vercel/ncc": "^0.45.0"
-  },
   "engines": {
     "node": ">=24"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
   }
 }

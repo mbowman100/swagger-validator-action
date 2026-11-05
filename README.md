@@ -75,3 +75,7 @@ npm test
 ```
 
 Commit `dist/` and `package-lock.json` when changing the action or its dependencies. CI checks that the bundle matches its source and tests both entry points.
+
+The build uses esbuild targeting Node.js 24 to preserve variable-based dynamic imports of Node built-ins used by the remote reference resolver. It replaces `dist/` on each build and includes third-party license notices. Avoid bundlers that turn these imports into empty module contexts: local documents can pass while remote `$ref` downloads fail with `Cannot find module 'node:dns/promises'`.
+
+The tests cover both source and standalone bundle execution, including valid and invalid remote references over HTTP and HTTPS with gzip responses. DNS and transport are redirected to an isolated local fixture server; the suite does not contact external services.
